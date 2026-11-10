@@ -1,5 +1,6 @@
 import {parseUsdt,formatWei,fetchLiveReserves,calculateQuote} from './quote.js';
 import {getDeposit,hashOk,sendViaWallet,CENTRAL} from './chain.js';
+import {routeCanAccept} from './routes.js';
 
 const tg=window.Telegram?.WebApp;
 if(tg){tg.ready();tg.expand();try{tg.setHeaderColor('#0b111c');tg.setBackgroundColor('#0b111c')}catch{}}
@@ -66,7 +67,7 @@ function addLink(label,url){
 function setAccepting(state){
  lastServiceStatus=state;
  const polygon=sourceRoute==='polygon-usdc';
- accepting=!polygon&&Boolean(state?.accepting)&&apiBase!==null;
+ accepting=apiBase!==null&&routeCanAccept(sourceRoute,state);
  el('service-closed-title').textContent=polygon
   ?'Polygon USDC пока не принимается':'Новые обмены временно недоступны';
  el('service-closed-description').textContent=polygon
