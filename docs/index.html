@@ -22,7 +22,8 @@
     <section class="intro">
       <p class="eyebrow">ОБМЕН БЕЗ ЗАЯВОК</p>
       <h1>USDT <span>→</span> MTT</h1>
-      <p>Отправляете USDT в сети BNB Smart Chain. После подтверждения обменник покупает нативные MTT и выплачивает их на ваш исходный EVM-адрес.</p>
+      <p>Отправляете USDT BEP-20 из личного EVM-кошелька в сети BNB Smart Chain. После подтверждения сервис покупает нативные MTT и выплачивает их на тот же адрес в MTT Network.</p>
+      <p class="muted"><strong>USDT на Binance?</strong> Сначала выведите BEP-20 на свой кошелёк (например, Trust Wallet или MetaMask); потребуется BNB для комиссии следующего перевода. <a href="https://t.me/babymttbot?start=binance" target="_blank" rel="noopener noreferrer">Инструкция для Binance</a>. Не отправляйте прямо с биржи на адрес обменника.</p>
     </section>
 
     <nav class="tabs" aria-label="Разделы Mini App">
@@ -42,7 +43,7 @@
           <div><span>Курс за 1 USDT</span><strong id="rate">—</strong></div>
           <div><span>Котировка</span><strong id="quote-state">Обновляем...</strong></div>
         </div>
-        <p id="quote-warning" class="small-warning">Расчёт предварительный. Итоговая сумма определяется по фактической покупке в пуле.</p>
+        <p id="quote-warning" class="small-warning">Расчёт предварительный: клиент получает 90% фактически купленных MTT, 10% остаётся сервису. Курс плавающий, расходы на сеть и вывод с биржи могут быть дополнительными.</p>
 
         <div id="service-closed" class="notice" role="status">
           <strong>Новые обмены временно недоступны</strong>
@@ -53,8 +54,8 @@
           <div class="divider"></div>
           <p class="field-name">Адрес для USDT BEP-20</p>
           <div class="address"><code id="deposit-address"></code><button type="button" id="copy-address" aria-label="Скопировать адрес">Копировать</button></div>
-          <p class="hint">Переводите только напрямую со своего EVM-адреса. С бирж, контрактов и через relayer поступления могут потребовать ручной проверки.</p>
-          <label class="consent"><input type="checkbox" id="agree"><span>Я контролирую исходный адрес в MTT Network, проверил сеть и принимаю плавающий курс, возможную задержку моста и порядок ручного разрешения сбоев.</span></label>
+          <p class="hint">Отправляйте только со своего EVM-адреса. Прямой вывод с Binance и других бирж на обменник НЕ поддерживается: сумма может не привязаться к вашему адресу. Не используйте контракты и relayer.</p>
+          <label class="consent"><input type="checkbox" id="agree"><span>Я контролирую исходный адрес в MTT Network, проверил сеть, вижу комиссию сервиса 10% и принимаю плавающий курс, возможную задержку моста и порядок ручного разрешения сбоев.</span></label>
           <button id="send" type="button" class="primary" disabled>Отправить USDT через кошелёк</button>
           <p id="wallet-hint" class="hint">Если в Telegram нет подключённого кошелька, скопируйте адрес и отправьте USDT через приложение своего кошелька.</p>
         </div>
@@ -87,7 +88,7 @@
         <div class="info-item"><span>02</span><p><strong>Резерв или мост</strong><br>Система использует имеющийся USDT в MTT Network или переводит нужную сумму через Bridge.</p></div>
         <div class="info-item"><span>03</span><p><strong>Прямой пул</strong><br>Router покупает нативные MTT, после чего вычисляется сумма клиенту по условиям курса.</p></div>
         <div class="info-item"><span>04</span><p><strong>Выплата</strong><br>MTT поступают на тот же EVM-адрес в MTT Network; хеш можно проверить в эксплорере.</p></div>
-        <p class="muted">Токены из других сетей, отправка с биржи или ошибочная сумма не гарантируют автоматическую обработку. При затруднениях обратитесь в чат бота с хешем транзакции, но не отправляйте приватные ключи.</p>
+        <p class="muted">Клиент получает 90% фактически купленных в пуле MTT; 10% удерживает сервис. Прямые выводы с Binance и других бирж, неверная сеть и ошибочные суммы не поддерживаются. При затруднениях обратитесь в чат бота с хешем транзакции, но никогда не сообщайте приватные ключи или seed-фразу.</p>
       </div>
     </section>
 
