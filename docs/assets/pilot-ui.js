@@ -49,6 +49,8 @@ async function drawDepositStatus(result){
     const raw=recipient.payout.amountWei;
     title('MTT поступили клиенту: '+formatWei(raw,2)+' MTT. Выплата подтверждается транзакцией.');
     showTx('pilot-mtt-link',recipient.payout.hash,'mtt');
+    const badge=document.querySelector('.status-pill');
+    if(badge)badge.textContent='✓ PILOT COMPLETED';
   }
 }
 export function initPilot({tg,notify}){
@@ -68,7 +70,7 @@ export function initPilot({tg,notify}){
       const slot=await checkPilotSlot();
       slotAvailable=slot.available&&!txHashOk(savedHash);
       if(!slotAvailable){
-        title(slot.reason);
+        if(el('pilot-mtt-link').classList.contains('hidden'))title(slot.reason);
         el('pilot-wallet-hint').textContent='Не отправляйте новые средства. Один тестовый депозит может быть уже использован.';
       }
     }catch{
@@ -119,7 +121,7 @@ export function initPilot({tg,notify}){
         title('Новый перевод не найден среди последних 1800 подтверждённых блоков BSC. Можно вставить хеш вручную.');
         return;
       }
-      savedHash=result.hash;
+      savedHash=result.hash;slotAvailable=false;refreshSend();
       el('pilot-tx-input').value=result.hash;
       try{localStorage.setItem('mtt-pilot-bsc-tx',result.hash)}catch{}
       await drawDepositStatus(result);
