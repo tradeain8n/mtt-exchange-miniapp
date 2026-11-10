@@ -1,4 +1,4 @@
-import {SNAPSHOT,parseUsdt,formatWei,calculateQuote} from './quote.js';
+import {SNAPSHOT,parseUsdt,formatWei,calculateQuote,fetchLiveReserves} from './quote.js';
 const tg=window.Telegram?.WebApp;
 if(tg){
   tg.ready();tg.expand();
@@ -7,7 +7,7 @@ if(tg){
 const el=id=>document.getElementById(id);
 const qs=sel=>document.querySelector(sel);
 const amount=el('amount');
-let lastQuote=null,simulationRunning=false,toastTimer;
+let lastQuote=null,simulationRunning=false,toastTimer,activeReserves=SNAPSHOT;
 const KEY='mtt-exchange-demo-history-v1';
 const notify=text=>{
   const toast=el('toast');toast.textContent=text;toast.classList.remove('hidden');
@@ -15,7 +15,7 @@ const notify=text=>{
 };
 function calculate(){
   try{
-    lastQuote=calculateQuote(parseUsdt(amount.value));
+    lastQuote=calculateQuote(parseUsdt(amount.value),activeReserves);
     el('result').textContent=formatWei(lastQuote.amountOut,2);
     el('per-usdt').textContent=formatWei(lastQuote.ratePerUsdt,0)+' MTT';
     el('impact').textContent=(Number(lastQuote.impactBps)/100).toFixed(2).replace('.',',')+'%';
@@ -85,3 +85,18 @@ async function simulate(){
 el('simulate').addEventListener('click',simulate);
 el('environment').textContent=tg?.initData?'TELEGRAM · SANDBOX':'WEB PREVIEW · SANDBOX';
 calculate();
+
+// Refresh the visible customer-inclusive quote using live on-chain reserves where available.
+async function refreshPoolQuote(){
+  try{
+    activeReserves=await fetchLiveReserves();
+    const notice=document.querySelector('.quote-notice');
+    if(notice)notice.textContent='Курс рассчитан по блоку MTT Network №'+activeReserves.block+
+      '. Итоговая сумма предварительная; фактическая выплата зависит от исполнения обмена.';
+  }catch{
+    const notice=document.querySelector('.quote-notice');
+    if(notice)notice.textContent='Нет связи с RPC. Показана историческая демонстрационная оценка от 10.11.2026. Не используйте её для реального перевода.';
+  }
+  calculate();
+}
+void refreshPoolQuote();

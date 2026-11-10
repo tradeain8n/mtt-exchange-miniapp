@@ -30,9 +30,38 @@ export function calculateQuote(amountWei, reserves=SNAPSHOT) {
   if(usdtWei<=0n || wmttWei<=0n)throw Error('Недоступные резервы');
   const amountNet=amountWei*(10000n-botFeeBps)/10000n;
   const amountPoolWeighted=amountNet*(10000n-poolFeeBps);
-  const amountOut=amountPoolWeighted*wmttWei/(usdtWei*10000n+amountPoolWeighted);
+  const poolOutput=amountPoolWeighted*wmttWei/(usdtWei*10000n+amountPoolWeighted);
+  // Public-facing price includes the operator spread; never display the provider's gross amount as the customer's quote.
+  const amountOut=poolOutput*9000n/10000n;
   const ideal=amountNet*wmttWei/usdtWei;
-  const impactBps=ideal>0n?(ideal-amountOut)*10000n/ideal:0n;
-  return {amountIn:amountWei,amountOut,impactBps,botFeeWei:amountWei-amountNet,
-    ratePerUsdt:amountOut*UNIT/amountWei,source:'historical_snapshot',block:reserves.block};
+  const impactBps=ideal>0n?(ideal-poolOutput)*10000n/ideal:0n;
+  return {amountIn:amountWei,amountOut,impactBps,
+    ratePerUsdt:amountOut*UNIT/amountWei,source:'quoted_customer_total',block:reserves.block};
+}
+
+// Public on-chain liquidity data only. No user funds, authentication or transaction signing.
+export async function fetchLiveReserves(fetcher=fetch){
+  async function call(method,params=[]){
+    const response=await fetcher('https://evm-rpc.mtt.network/',{
+      method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({jsonrpc:'2.0',method,params,id:1}),
+      signal:AbortSignal.timeout(9000)
+    });
+    if(!response.ok)throw Error('MTT RPC unavailable');
+    const data=await response.json();
+    if(data.error||typeof data.result!=='string')throw Error('MTT RPC invalid result');
+    return data.result;
+  }
+  const chain=await call('eth_chainId');
+  if(BigInt(chain)!==6880n)throw Error('Wrong MTT network');
+  const pair='0xd177f36436C7C85E4a0bBEcF10A3A331E97Dd4c0';
+  const [raw,block]=await Promise.all([
+    call('eth_call',[{to:pair,data:'0x0902f1ac'},'latest']),
+    call('eth_blockNumber')
+  ]);
+  if(raw.length<194)throw Error('Unexpected pool reserves format');
+  const usdtWei=BigInt('0x'+raw.slice(2,66));
+  const wmttWei=BigInt('0x'+raw.slice(66,130));
+  if(usdtWei<=0n||wmttWei<=0n)throw Error('Empty liquidity pool');
+  return {...SNAPSHOT,usdtWei,wmttWei,block:Number(BigInt(block)),live:true};
 }

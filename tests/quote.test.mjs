@@ -7,9 +7,9 @@ test('exact USDT decimals and display',()=>{
 });
 test('quote produces positive MTT output without double spending',()=>{
   const q=calculateQuote(parseUsdt('1.1'));
-  assert.ok(q.amountOut>40000n*10n**18n);
+  assert.ok(q.amountOut>30000n*10n**18n);
   assert.ok(q.amountOut<60000n*10n**18n);
-  assert.equal(q.source,'historical_snapshot');
+  assert.equal(q.source,'quoted_customer_total');
   assert.equal(q.block,SNAPSHOT.block);
 });
 test('larger trade increases price impact',()=>{
@@ -21,4 +21,13 @@ test('invalid input cannot become a quote',()=>{
   for(const invalid of ['','-1','0.01','21','1e8','1.1234567','Infinity','0']){
     assert.throws(()=>parseUsdt(invalid));
   }
+});
+
+test('displayed customer quote is net of the configured spread, not gross provider output',()=>{
+  const amount=parseUsdt('1');
+  const q=calculateQuote(amount);
+  const net=amount*9900n/10000n;
+  const w=net*9750n;
+  const gross=w*SNAPSHOT.wmttWei/(SNAPSHOT.usdtWei*10000n+w);
+  assert.equal(q.amountOut,gross*9000n/10000n);
 });
