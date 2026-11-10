@@ -19,9 +19,9 @@
         <div class="brand-icon" aria-hidden="true"><span>MTT</span></div>
         <div class="brand-name">MTT <span>EXCHANGE</span><small>Telegram Mini App</small></div>
       </div>
-      <span class="status-pill"><span class="status-dot"></span> DEMO MVP</span>
+      <span class="status-pill"><span class="status-dot"></span> PILOT 1 USDT</span>
     </header>
-    <div class="network-alert" role="status"><span class="alert-icon">i</span><span>Тестовый интерфейс. Отправка реальных средств отключена. Не переводите токены по адресу из демо.</span></div>
+    <div class="network-alert" role="status"><span class="alert-icon">i</span><span>Реальный пилот только для одного зарегистрированного адреса и ровно 1 USDT. Курс не гарантирован; при сбое обмен может потребовать ручного решения.</span></div>
 
     <div class="hero">
       <div class="hero-glow" aria-hidden="true"></div>
@@ -32,12 +32,54 @@
     </div>
 
     <nav class="tabs" aria-label="Разделы приложения">
-      <button class="tab selected" data-tab="swap" aria-selected="true">Обмен</button>
+      <button class="tab selected" data-tab="pilot" aria-selected="true">Тест 1 USDT</button>
+      <button class="tab" data-tab="swap" aria-selected="false">Курс</button>
       <button class="tab" data-tab="history" aria-selected="false">История</button>
-      <button class="tab" data-tab="about" aria-selected="false">Как работает</button>
+      <button class="tab" data-tab="about" aria-selected="false">О сервисе</button>
     </nav>
 
-    <section id="pane-swap" class="pane" aria-label="Демо обмена">
+    <section id="pane-pilot" class="pane" aria-label="Реальный тест 1 USDT">
+      <div class="swap-card pilot-card">
+        <div class="card-head"><span>ПИЛОТ · ОДНА ОПЕРАЦИЯ</span><span class="rate-tag">◉ BSC → MTT</span></div>
+        <div class="pilot-amount"><span>1,000000</span><strong>USDT</strong></div>
+        <p class="pilot-subline">Отправить в BNB Smart Chain (BEP-20)</p>
+        <div class="pilot-direction"><span>◈ BSC / USDT</span><span>→</span><span>◈ MTT Network</span></div>
+        <p class="field-label">Адрес получателя — центральный кошелёк</p>
+        <div class="pilot-address"><code id="pilot-deposit-address">0x976802182265f48ff30A2Bd64f489166f5D3D5aE</code><button id="pilot-copy" type="button" aria-label="Копировать депозитный адрес"><span aria-hidden="true">▣</span></button></div>
+        <div class="pilot-owner">
+          <span>Разрешённый отправитель</span>
+          <code>0x136e104e...63088a</code>
+        </div>
+        <div class="pilot-owner">
+          <span>Клиент получит</span>
+          <strong id="pilot-quote">Расчёт...</strong>
+        </div>
+        <p class="pilot-warning">Выплата отправляется на исходный адрес клиента в сети MTT. Используется только прямой вызов USDT.transfer со своего кошелька; переводы с бирж, relayer и multicall не подходят.</p>
+        <label class="pilot-confirm"><input type="checkbox" id="pilot-understand"><span>Я контролирую указанный кошелёк в сети MTT Network и понимаю, что при сбое моста или изменении курса операция может быть остановлена.</span></label>
+        <button id="pilot-send" class="primary" type="button" disabled>Отправить 1 USDT через кошелёк <span>↗</span></button>
+        <p id="pilot-wallet-hint" class="under-button">В Telegram может потребоваться открыть ваш кошелёк отдельно и выполнить обычную отправку USDT.</p>
+      </div>
+
+      <div class="pilot-track">
+        <div class="section-label">ОТСЛЕЖИВАНИЕ НАСТОЯЩЕГО ОБМЕНА</div>
+        <div id="pilot-state" class="pilot-state" role="status">Ожидается новый перевод ровно 1 USDT</div>
+        <ol class="steps">
+          <li class="pilot-step" data-pilot-step="0"><span class="step-n">1</span><div><strong>USDT получен в BSC</strong><small>Точная сумма, адрес и подтверждения</small></div></li>
+          <li class="pilot-step" data-pilot-step="1"><span class="step-n">2</span><div><strong>Bridge / резерв</strong><small>Перевод USDT в MTT Network</small></div></li>
+          <li class="pilot-step" data-pilot-step="2"><span class="step-n">3</span><div><strong>Прямой обмен через Router</strong><small>Получение нативного MTT</small></div></li>
+          <li class="pilot-step" data-pilot-step="3"><span class="step-n">4</span><div><strong>Выплата клиенту</strong><small>Проверка перевода MTT на исходный адрес</small></div></li>
+        </ol>
+        <a id="pilot-bsc-link" class="pilot-tx-link hidden" href="#" target="_blank" rel="noopener noreferrer">Открыть подтверждение BSC ↗</a>
+        <a id="pilot-mtt-link" class="pilot-tx-link hidden" href="#" target="_blank" rel="noopener noreferrer">Открыть выплату MTT ↗</a>
+        <p class="pilot-support">Mini App проверяет публичный блокчейн. Подробные этапы Bridge и Router фиксируются приватным движком; отсутствие статуса здесь не означает, что транзакция не выполняется.</p>
+        <label class="field-label" for="pilot-tx-input">Уже отправили USDT? Вставьте BSC-хеш (необязательно)</label>
+        <input id="pilot-tx-input" class="pilot-tx-input" type="text" spellcheck="false" placeholder="0x… транзакция BSC" autocomplete="off"/>
+        <div class="pilot-buttons"><button id="pilot-verify" type="button">Проверить хеш</button><button id="pilot-scan" type="button">Найти перевод автоматически</button></div>
+        <p id="pilot-checked" class="pilot-checked">Сканирование новых депозитов выполняется вручную или после открытия этого экрана.</p>
+      </div>
+    </section>
+
+    <section id="pane-swap" class="pane hidden" aria-label="Демо калькулятора">
       <div class="swap-card">
         <div class="card-head"><span>РАССЧИТАТЬ ОБМЕН</span><span class="rate-tag">◉ Демо-котировка</span></div>
         <label class="token-input" for="amount">
@@ -96,7 +138,7 @@
     </section>
 
     <footer class="footer">
-      <span>MTT EXCHANGE <span class="version">MVP · 0.1</span></span>
+      <span>MTT EXCHANGE <span class="version">MVP · 0.2</span></span>
       <span id="environment">SANDBOX MODE</span>
     </footer>
   </main>

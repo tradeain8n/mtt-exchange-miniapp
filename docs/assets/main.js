@@ -1,4 +1,5 @@
 import {SNAPSHOT,parseUsdt,formatWei,calculateQuote,fetchLiveReserves} from './quote.js';
+import {initPilot} from './pilot-ui.js';
 const tg=window.Telegram?.WebApp;
 if(tg){
   tg.ready();tg.expand();
@@ -85,6 +86,7 @@ async function simulate(){
 el('simulate').addEventListener('click',simulate);
 el('environment').textContent=tg?.initData?'TELEGRAM · SANDBOX':'WEB PREVIEW · SANDBOX';
 calculate();
+initPilot({tg,notify});
 
 // Refresh the visible customer-inclusive quote using live on-chain reserves where available.
 async function refreshPoolQuote(){
