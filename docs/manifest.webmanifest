@@ -1,11 +1,11 @@
 {
-  "name": "MTT Exchange — Telegram Mini App",
-  "short_name": "MTT Exchange",
+  "name": "Baby MTT Exchange",
+  "short_name": "Baby MTT",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#080e1c",
-  "theme_color": "#080e1c",
-  "description": "MTT Exchange MVP демонстрация автоматического обмена",
+  "background_color": "#0b111c",
+  "theme_color": "#0b111c",
+  "description": "Обмен USDT BEP-20 на нативный MTT и проверка транзакций",
   "icons": [
     {
       "src": "./icon.svg",

@@ -16,16 +16,16 @@ async function api(method,body){
 const me=await api('getMe',{});
 if(me.id!==expectedId)throw Error('The secret belongs to the wrong Telegram bot');
 await api('setChatMenuButton',{menu_button:{
-  type:'web_app',text:'Тест 1 USDT',web_app:{url:appUrl}
+  type:'web_app',text:'Обмен USDT → MTT',web_app:{url:appUrl}
 }});
 await api('setMyCommands',{commands:[
-  {command:'start',description:'Открыть MTT Exchange'},
-  {command:'help',description:'Как работает автоматический обмен'}
+  {command:'start',description:'Открыть Baby MTT Exchange'},
+  {command:'help',description:'Статус и условия обмена'}
 ]});
 await api('setMyShortDescription',{short_description:
-  'MTT Exchange 💱 — демо обмена USDT (BSC) на MTT Network в Telegram.'});
+  'Baby MTT Exchange — обмен USDT (BSC) на MTT Network, курс и статус переводов.'});
 await api('setMyDescription',{description:
-  'MTT Exchange — Telegram Mini App для автоматического обмена USDT (BSC) → MTT Network. Открыт одноразовый пилот на 1 USDT для зарегистрированного адреса: прямой BSC Transfer, Bridge, Router и выплата MTT. Остальные суммы не обрабатываются автоматически.'});
+  'Baby MTT Exchange: калькулятор по ликвидности пула, прозрачный операционный статус и проверка транзакций USDT BSC → MTT Network. Приём активируется только после готовности платёжного процессора.'});
 const menu=await api('getChatMenuButton',{});
 const commands=await api('getMyCommands',{});
 const webhook=await api('getWebhookInfo',{});
