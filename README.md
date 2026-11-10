@@ -37,7 +37,7 @@ gh secret set TELEGRAM_BOT_TOKEN -R tradeain8n/mtt-exchange-miniapp
 
 Команда безопасно запросит секрет через stdin (не вводите его как аргумент `-b`). Откройте GitHub Actions → `Configure Telegram Mini App menu` → `Run workflow`. Script `scripts/configure_bot.mjs` проверит `getMe.id===8456005459` и установит кнопку `MTT Exchange` с HTTPS Web App URL, а также команды `/start` и `/help`. Не раскрывает токен в логах.
 
-Кнопка меню не заменяет обработчик `/start`. Для полноценного ответа бота добавьте отдельный webhook/worker после подключения backend.
+Серверный обработчик `/start` и `/help` реализован в `src/telegram_bot.mjs` и `POST /api/telegram/webhook`. Он проверяет секрет Telegram webhook и показывает кнопку Mini App. **Для получения ответов на команды** необходимо развернуть Node.js backend с HTTPS и подключить webhook по [инструкции](docs/WEBHOOK_SETUP.md); GitHub Pages сам по себе не обрабатывает сообщения бота.
 
 ## Архитектура MVP
 

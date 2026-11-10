@@ -4,6 +4,7 @@ import {readFile,stat} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {SNAPSHOT,calculateQuote,parseUsdt,formatWei} from '../docs/assets/quote.js';
+import {validateWebhookSecret,processBotUpdate} from './telegram_bot.mjs';
 const here=path.dirname(fileURLToPath(import.meta.url));
 const publicRoot=path.resolve(here,'../docs');
 const ORIGIN=process.env.APP_ORIGIN||'https://tradeain8n.github.io';
@@ -66,6 +67,20 @@ async function readBody(req){
 async function route(req,res){
   const origin=req.headers.origin||'';
   const url=new URL(req.url||'/', 'http://localhost');
+  if(url.pathname==='/api/telegram/webhook'){
+    if(req.method!=='POST'){res.writeHead(405);return res.end()}
+    const secret=process.env.TELEGRAM_WEBHOOK_SECRET||'';
+    if(!TOKEN||!secret)return json(res,503,{ok:false,error:'webhook_not_configured'},origin);
+    if(!validateWebhookSecret(req.headers['x-telegram-bot-api-secret-token'],secret)){
+      return json(res,401,{ok:false,error:'webhook_unauthorized'},origin);
+    }
+    let update;
+    try{update=await readBody(req);}catch{
+      return json(res,400,{ok:false,error:'invalid_json'},origin);
+    }
+    const answer=await processBotUpdate(update,{token:TOKEN});
+    return json(res,200,{ok:true,handled:answer.handled},origin);
+  }
   if(url.pathname.startsWith('/api/')){
     if(req.method==='OPTIONS'){
       res.writeHead(204,{'access-control-allow-origin':origin===ORIGIN?ORIGIN:'null',

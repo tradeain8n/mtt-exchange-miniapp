@@ -22,4 +22,22 @@ await api('setMyCommands',{commands:[
   {command:'start',description:'Открыть MTT Exchange'},
   {command:'help',description:'Как работает автоматический обмен'}
 ]});
-console.log('BOT_MENU_CONFIGURED',JSON.stringify({bot_id:me.id,username:me.username,mini_app:appUrl}));
+await api('setMyShortDescription',{short_description:
+  'MTT Exchange 💱 — демо обмена USDT (BSC) на MTT Network в Telegram.'});
+await api('setMyDescription',{description:
+  'MTT Exchange — Telegram Mini App для автоматического обмена USDT (BSC) → MTT Network. Сейчас доступен демонстрационный калькулятор и симуляция операций. Реальные средства не отправляйте.'});
+const menu=await api('getChatMenuButton',{});
+const commands=await api('getMyCommands',{});
+const webhook=await api('getWebhookInfo',{});
+if(menu.type!=='web_app'||menu.web_app?.url!==appUrl){
+  throw Error('Telegram menu configuration could not be verified');
+}
+if(!commands.some(x=>x.command==='start')||!commands.some(x=>x.command==='help')){
+  throw Error('Telegram commands were not saved');
+}
+console.log('BOT_MENU_VERIFIED',JSON.stringify({
+  bot_id:me.id,username:me.username,
+  menu_url:menu.web_app.url,
+  commands:commands.map(x=>x.command),
+  webhook_configured:Boolean(webhook.url)
+}));

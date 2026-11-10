@@ -1,0 +1,22 @@
+name: Configure Telegram bot webhook (requires hosted backend)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  webhook:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check webhook configuration
+        run: node --check scripts/configure_webhook.mjs
+      - name: Set Telegram webhook
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_WEBHOOK_SECRET: ${{ secrets.TELEGRAM_WEBHOOK_SECRET }}
+          BOT_WEBHOOK_URL: ${{ vars.BOT_WEBHOOK_URL }}
+        run: node scripts/configure_webhook.mjs

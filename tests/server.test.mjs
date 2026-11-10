@@ -31,6 +31,10 @@ test('sandbox endpoint exposes no real executable operations',async()=>{
   assert.equal((await health.json()).mode,'sandbox');
   const status=await fetch(base+'/api/execute',{method:'POST'});
   assert.equal(status.status,404);
+  const webhook=await fetch(base+'/api/telegram/webhook',{
+    method:'POST',headers:{'content-type':'application/json'},body:'{}'
+  });
+  assert.equal(webhook.status,503);
   const home=await fetch(base+'/');
   assert.equal(home.status,200);
   assert.match(await home.text(),/MTT EXCHANGE/);
