@@ -1,10 +1,11 @@
-// Illustrative, immutable reserve snapshot. Never use as an executable quote.
+// Illustrative, immutable reserve snapshot. Direct pool route without Quick Swap bot.
+// Never use this historical snapshot as an executable quote.
 export const SNAPSHOT = Object.freeze({
   block: 22708828,
   capturedAt: '2026-11-10',
   usdtWei: 359838025095212724162n,
   wmttWei: 16763215249411104165279683n,
-  botFeeBps: 100n,
+  botFeeBps: 0n,
   poolFeeBps: 250n
 });
 const UNIT=10n**18n;
@@ -31,7 +32,7 @@ export function calculateQuote(amountWei, reserves=SNAPSHOT) {
   const amountNet=amountWei*(10000n-botFeeBps)/10000n;
   const amountPoolWeighted=amountNet*(10000n-poolFeeBps);
   const poolOutput=amountPoolWeighted*wmttWei/(usdtWei*10000n+amountPoolWeighted);
-  // Public-facing price includes the operator spread; never display the provider's gross amount as the customer's quote.
+  // The customer-visible output is inclusive of our pricing; actual route is Bridge 1:1 then direct AMM.
   const amountOut=poolOutput*9000n/10000n;
   const ideal=amountNet*wmttWei/usdtWei;
   const impactBps=ideal>0n?(ideal-poolOutput)*10000n/ideal:0n;

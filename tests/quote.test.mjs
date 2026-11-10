@@ -26,7 +26,7 @@ test('invalid input cannot become a quote',()=>{
 test('displayed customer quote is net of the configured spread, not gross provider output',()=>{
   const amount=parseUsdt('1');
   const q=calculateQuote(amount);
-  const net=amount*9900n/10000n;
+  const net=amount;
   const w=net*9750n;
   const gross=w*SNAPSHOT.wmttWei/(SNAPSHOT.usdtWei*10000n+w);
   assert.equal(q.amountOut,gross*9000n/10000n);
@@ -46,4 +46,13 @@ test('live reserve reader validates network and decodes onchain V2 pair response
   assert.equal(data.wmttWei,SNAPSHOT.wmttWei);
   assert.equal(data.live,true);
   assert.equal(calculateQuote(parseUsdt('1'),data).amountOut,calculateQuote(parseUsdt('1')).amountOut);
+});
+
+test('direct pool quote matches on-chain Router getAmountsOut at observed reserves',()=>{
+  const pool={...SNAPSHOT,usdtWei:383475212044373142837n,wmttWei:15188106589039093340415064n};
+  const input=parseUsdt('1');
+  const weight=input*975n;
+  const routerExpected=weight*pool.wmttWei/(pool.usdtWei*1000n+weight);
+  assert.equal(routerExpected,38518391875939280018766n);
+  assert.equal(calculateQuote(input,pool).amountOut,routerExpected*9000n/10000n);
 });

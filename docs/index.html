@@ -27,7 +27,7 @@
       <div class="hero-glow" aria-hidden="true"></div>
       <span class="eyebrow">БЕЗ ЗАЯВОК И ЛИШНИХ ШАГОВ</span>
       <h1>Обмен MTT<br><em>в один перевод.</em></h1>
-      <p>USDT в сети BSC → MTT Network. После оплаты система обнаруживает транзакцию и рассчитывает выплату на ваш EVM-адрес.</p>
+      <p>USDT в сети BSC → мост → прямой пул MTT Network. Система обнаруживает депозит и рассчитывает выплату на ваш EVM-адрес.</p>
       <div class="hero-chips"><span>◈ BSC</span><span>↔</span><span>◈ MTT Chain</span></div>
     </div>
 
@@ -89,7 +89,7 @@
       <div class="about-card">
         <div class="about-step"><span>01</span><div><strong>Один адрес для депозита</strong><p>Пользователь переводит USDT BEP-20 на адрес обменника. Заявка на сайте не создаётся.</p></div></div>
         <div class="about-step"><span>02</span><div><strong>Сканирование BSC</strong><p>Watcher следит за событиями официального контракта USDT и ожидает подтверждений сети.</p></div></div>
-        <div class="about-step"><span>03</span><div><strong>Курс и резерв</strong><p>Rate Engine рассчитывает количество MTT с учётом резерва, комиссии и влияния объёма сделки.</p></div></div>
+        <div class="about-step"><span>03</span><div><strong>Мост и прямой пул</strong><p>После межсетевого получения USDT сервис использует контракт AMM Router для покупки MTT с контролем цены и резервов.</p></div></div>
         <div class="about-step"><span>04</span><div><strong>Автоматическая выплата</strong><p>Отдельный подписант отправляет MTT на исходный EVM-адрес и фиксирует оба хеша.</p></div></div>
       </div>
       <p class="muted-note">До запуска реального обмена необходимы контрактный аудит, контроль резервов, обработка сбоев и соблюдение требований применимого законодательства.</p>

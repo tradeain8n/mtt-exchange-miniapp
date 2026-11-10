@@ -47,7 +47,7 @@ export async function reserves(){
     rpc('eth_blockNumber'),rpc('eth_call',[{to:USDT,data:balancePayload(PAIR)},'latest']),
     rpc('eth_call',[{to:WMTT,data:balancePayload(PAIR)},'latest'])]);
   const data={usdtWei:BigInt(usdt),wmttWei:BigInt(wmtt),
-    botFeeBps:100n,poolFeeBps:250n,block:Number(BigInt(block))};
+    botFeeBps:0n,poolFeeBps:250n,block:Number(BigInt(block))};
   if(data.usdtWei<=0n||data.wmttWei<=0n)throw Error('EMPTY_RESERVES');
   lastPool={at:Date.now(),data};return data;
 }
@@ -92,7 +92,7 @@ async function route(req,res){
       try{
         const amount=parseUsdt(url.searchParams.get('amount')||'1');
         let pool=SNAPSHOT,source='snapshot';
-        try{pool=await reserves();source='onchain_mtt_rpc';}catch{}
+        try{pool=await reserves();source='mtt_direct_pool_reserves';}catch{}
         const q=calculateQuote(amount,pool);
         return json(res,200,{ok:true,quote:{
           amount_in:formatWei(q.amountIn,4),amount_out:formatWei(q.amountOut,4),
