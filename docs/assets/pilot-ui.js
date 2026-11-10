@@ -1,5 +1,5 @@
 import {PILOT,txHashOk,validateDepositHash,findRecentDeposit,inspectMttRecipient,
-  sendViaInjectedProvider} from './pilot-status.js';
+  sendViaInjectedProvider,checkPilotSlot} from './pilot-status.js';
 import {fetchLiveReserves,calculateQuote,parseUsdt,formatWei} from './quote.js';
 
 const el=id=>document.getElementById(id);
@@ -52,7 +52,7 @@ async function drawDepositStatus(result){
   }
 }
 export function initPilot({tg,notify}){
-  let savedHash='';
+  let savedHash='',slotAvailable=false;
   const allowedSender=PILOT.sender;
   const submit=el('pilot-send');
   const agreed=el('pilot-understand');
@@ -60,11 +60,27 @@ export function initPilot({tg,notify}){
   if(txHashOk(savedHash))el('pilot-tx-input').value=savedHash;
 
   const injected=Boolean(window.ethereum?.request);
-  const refreshSend=()=>{submit.disabled=!agreed.checked||!injected};
+  const refreshSend=()=>{submit.disabled=!agreed.checked||!injected||!slotAvailable};
   agreed.addEventListener('change',refreshSend);
   refreshSend();
+  async function refreshSlot(){
+    try{
+      const slot=await checkPilotSlot();
+      slotAvailable=slot.available&&!txHashOk(savedHash);
+      if(!slotAvailable){
+        title(slot.reason);
+        el('pilot-wallet-hint').textContent='Не отправляйте новые средства. Один тестовый депозит может быть уже использован.';
+      }
+    }catch{
+      slotAvailable=false;
+      el('pilot-wallet-hint').textContent='Не удалось проверить доступность одноразового пилота. Пока не отправляйте средства.';
+    }
+    refreshSend();
+    return slotAvailable;
+  }
   if(!injected)el('pilot-wallet-hint').textContent=
     'В Telegram не обнаружен встроенный EVM-кошелёк. Скопируйте адрес выше и выполните прямой перевод 1 USDT BEP-20 из своего приложения кошелька. Затем проверьте хеш ниже.';
+  void refreshSlot();
 
   el('pilot-copy').addEventListener('click',async()=>{
     const success=await copy(PILOT.central);
@@ -81,7 +97,7 @@ export function initPilot({tg,notify}){
     title('Проверяю транзакцию в блокчейне BSC...');
     try{
       const result=await validateDepositHash(hash);
-      savedHash=hash;
+      savedHash=hash;slotAvailable=false;refreshSend();
       try{localStorage.setItem('mtt-pilot-bsc-tx',hash)}catch{}
       await drawDepositStatus(result);
       el('pilot-checked').textContent='Последняя проверка '+new Date().toLocaleTimeString('ru-RU');
@@ -116,6 +132,7 @@ export function initPilot({tg,notify}){
 
   submit.addEventListener('click',async()=>{
     if(!agreed.checked||!injected)return;
+    if(!await refreshSlot())return;
     const yes=window.confirm('Отправить РОВНО 1 USDT (BEP-20) с зарегистрированного адреса '+allowedSender+' на '+PILOT.central+'? Ваш кошелёк запросит отдельное подтверждение. Это реальная операция.');
     if(!yes)return;
     submit.disabled=true;

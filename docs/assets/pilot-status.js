@@ -9,7 +9,8 @@ export const PILOT=Object.freeze({
   bridge:'0x36e999c652c0C433eDefba6dA98eaB7Dbd17b550',
   chainId:56,
   activationBlock:132808814,
-  confirmations:6
+  confirmations:6,
+  expiresAt:"2026-11-11T17:00:00Z"
 });
 const BSC_RPC='https://bsc-rpc.publicnode.com';
 const MTT_RPC='https://evm-rpc.mtt.network/';
@@ -65,6 +66,26 @@ export async function validateDepositHash(hash,{fetcher=fetch}={}){
   const result=validateDeposit(tx,receipt,Number.parseInt(head,16));
   const block=await rpc(BSC_RPC,'eth_getBlockByNumber',[receipt.blockNumber,false],fetcher);
   return {...result,timestamp:block?.timestamp?Number.parseInt(block.timestamp,16):null};
+}
+// The one-shot pilot must not invite a second payment after any customer transfer.
+export async function checkPilotSlot({fetcher=fetch,now=Date.now()}={}){
+  if(now>=Date.parse(PILOT.expiresAt))return {available:false,reason:'Время тестового окна истекло. Нельзя отправлять средства.'};
+  const head=Number.parseInt(await rpc(BSC_RPC,'eth_blockNumber',[],fetcher),16);
+  const final=head-PILOT.confirmations+1;
+  const start=PILOT.activationBlock+1;
+  if(start>final)return {available:true,checkedThrough:final};
+  if(final-start>12000)return {available:false,reason:'Слишком много блоков после активации. Нужна проверка оператора.'};
+  for(let from=start;from<=final;from+=900){
+    const end=Math.min(from+899,final);
+    const logs=await rpc(BSC_RPC,'eth_getLogs',[{
+      fromBlock:'0x'+from.toString(16),
+      toBlock:'0x'+end.toString(16),
+      address:PILOT.usdtBsc,
+      topics:[TRANSFER_TOPIC,topicAddress(PILOT.sender),topicAddress(PILOT.central)]
+    }],fetcher);
+    if((logs||[]).length)return {available:false,reason:'Из этого кошелька уже поступал перевод USDT. Повторная оплата запрещена.'};
+  }
+  return {available:true,checkedThrough:final};
 }
 export async function findRecentDeposit({fetcher=fetch,windowBlocks=1800}={}){
   const head=Number.parseInt(await rpc(BSC_RPC,'eth_blockNumber',[],fetcher),16);

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {PILOT,directTransferData,topicAddress,validateDeposit,
   validateDepositHash,findRecentDeposit,txHashOk,sendViaInjectedProvider,
-  inspectMttRecipient} from '../docs/assets/pilot-status.js';
+  inspectMttRecipient,checkPilotSlot} from '../docs/assets/pilot-status.js';
 
 const H='0x'+'a'.repeat(64);
 const topic='0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
@@ -91,4 +91,21 @@ test('MTT payout evidence requires central sender, client recipient, and later t
  assert.equal(before.payout.hash,H);
  const after=await inspectMttRecipient({fetcher,since:Date.parse(timestamp)/1000+60});
  assert.equal(after.payout,null);
+});
+
+test('pilot slot blocks a second USDT transfer and expires safely',async()=>{
+  const before=Date.parse(PILOT.expiresAt)-3600000;
+  const fetcher=async(url,request)=>{
+    const {method}=JSON.parse(request.body);
+    return {ok:true,json:async()=>({result:method==='eth_blockNumber'
+      ?'0x'+(PILOT.activationBlock+26).toString(16):[]})};
+  };
+  assert.equal((await checkPilotSlot({fetcher,now:before})).available,true);
+  const existing=async(url,request)=>{
+    const {method}=JSON.parse(request.body);
+    return {ok:true,json:async()=>({result:method==='eth_blockNumber'
+      ?'0x'+(PILOT.activationBlock+26).toString(16):[log]})};
+  };
+  assert.equal((await checkPilotSlot({fetcher:existing,now:before})).available,false);
+  assert.equal((await checkPilotSlot({fetcher,now:Date.parse(PILOT.expiresAt)+1})).available,false);
 });
