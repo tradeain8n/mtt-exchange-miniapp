@@ -14,7 +14,7 @@ export function parseUsdt(value) {
   if(!/^\d{1,5}(\.\d{0,6})?$/.test(normalized)) throw Error('Укажите корректную сумму USDT');
   const [whole,frac='']=normalized.split('.');
   const amount=BigInt(whole)*UNIT+BigInt((frac+'0'.repeat(18)).slice(0,18));
-  if(amount<UNIT/10n || amount>20n*UNIT)throw Error('В демо доступно от 0,1 до 20 USDT');
+  if(amount<UNIT || amount>20n*UNIT)throw Error('Поддерживается от 1 до 20 USDT');
   return amount;
 }
 export function formatWei(value,digits=2) {
@@ -56,13 +56,29 @@ export async function fetchLiveReserves(fetcher=fetch){
   const chain=await call('eth_chainId');
   if(BigInt(chain)!==6880n)throw Error('Wrong MTT network');
   const pair='0xd177f36436C7C85E4a0bBEcF10A3A331E97Dd4c0';
-  const [raw,block]=await Promise.all([
-    call('eth_call',[{to:pair,data:'0x0902f1ac'},'latest']),
-    call('eth_blockNumber')
+  const usdt='0x78a39b9101983D2009Ff14773E8e47Ca3a23BBfD'.toLowerCase();
+  const wmtt='0xD0CA95e52995F55e62A1670E16A13DAdb76379A9'.toLowerCase();
+  // Pin all three reads to the same chain height to avoid a mixed-block quote.
+  const height=BigInt(await call('eth_blockNumber'));
+  if(height<=0n||height>BigInt(Number.MAX_SAFE_INTEGER))throw Error('Invalid pool block');
+  const tag='0x'+height.toString(16);
+  const [raw,token0Raw,token1Raw]=await Promise.all([
+    call('eth_call',[{to:pair,data:'0x0902f1ac'},tag]),
+    call('eth_call',[{to:pair,data:'0x0dfe1681'},tag]),
+    call('eth_call',[{to:pair,data:'0xd21220a7'},tag])
   ]);
-  if(raw.length<194)throw Error('Unexpected pool reserves format');
-  const usdtWei=BigInt('0x'+raw.slice(2,66));
-  const wmttWei=BigInt('0x'+raw.slice(66,130));
+  if(!/^0x[0-9a-f]{192}$/i.test(raw))throw Error('Unexpected pool reserves format');
+  const addressWord=value=>{
+    if(!/^0x0{24}[0-9a-f]{40}$/i.test(value))throw Error('Invalid pair token');
+    return ('0x'+value.slice(26)).toLowerCase();
+  };
+  const token0=addressWord(token0Raw),token1=addressWord(token1Raw);
+  if(!((token0===usdt&&token1===wmtt)||(token0===wmtt&&token1===usdt)))
+    throw Error('Unexpected MTT pair assets');
+  const reserve0=BigInt('0x'+raw.slice(2,66));
+  const reserve1=BigInt('0x'+raw.slice(66,130));
+  const usdtWei=token0===usdt?reserve0:reserve1;
+  const wmttWei=token0===wmtt?reserve0:reserve1;
   if(usdtWei<=0n||wmttWei<=0n)throw Error('Empty liquidity pool');
-  return {...SNAPSHOT,usdtWei,wmttWei,block:Number(BigInt(block)),live:true};
+  return {...SNAPSHOT,usdtWei,wmttWei,block:Number(height),live:true};
 }
