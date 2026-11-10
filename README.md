@@ -1,0 +1,64 @@
+# MTT Exchange — Telegram Mini App MVP
+
+**Demo/sandbox:** публичный HTTPS-интерфейс с беззаявочной логикой USDT (BSC) → MTT Network, расчетом по историческому снимку пула, анимированным сценарием и локальной историей. Реальные средства не принимаются; выплаты, депозитный адрес и hot wallet пока не подключены.
+
+## Публичный Mini App
+
+**https://tradeain8n.github.io/mtt-exchange-miniapp/**
+
+Код в `docs/` разворачивается через GitHub Pages. Тестовый интерфейс можно открыть как обычный сайт; после подключения Telegram-бота он открывается через кнопку меню Web App.
+
+## Локальный запуск
+
+```bash
+npm test
+npm start
+# Открыть http://localhost:8787
+```
+
+Backend API на Node.js (без внешних пакетов):
+
+- `GET /api/health` — режим sandbox.
+- `GET /api/quote?amount=1.1` — расчёт по RPC MTT Chain; при недоступности RPC — **помеченный** исторический снимок.
+- `POST /api/session` — проверка HMAC `Telegram.WebApp.initData` (только при заданном `TELEGRAM_BOT_TOKEN`).
+- `/api/execute` **не существует**; реальные транзакции не запускаются.
+
+При размещении backend укажите `APP_ORIGIN=https://tradeain8n.github.io`, `TELEGRAM_BOT_TOKEN` (новый токен после ротации) и при необходимости `MTT_RPC_URL`.
+
+**Важно:** статический сайт GitHub Pages работает и без backend, но в этом случае показывает демо-расчёт по фиксированным резервам на 10.11.2026. Telegram initData не может считаться проверенным на стороне сервера, пока backend не развёрнут.
+
+## Подключение к боту
+
+Токен, ранее опубликованный в переписке, считайте скомпрометированным. **Сначала перевыпустите его через @BotFather**, не пересылая новый токен в чат. Затем сохраните новый токен в GitHub Actions Secrets публичного репозитория:
+
+```bash
+gh secret set TELEGRAM_BOT_TOKEN -R tradeain8n/mtt-exchange-miniapp
+```
+
+Команда безопасно запросит секрет через stdin (не вводите его как аргумент `-b`). Откройте GitHub Actions → `Configure Telegram Mini App menu` → `Run workflow`. Script `scripts/configure_bot.mjs` проверит `getMe.id===8456005459` и установит кнопку `MTT Exchange` с HTTPS Web App URL, а также команды `/start` и `/help`. Не раскрывает токен в логах.
+
+Кнопка меню не заменяет обработчик `/start`. Для полноценного ответа бота добавьте отдельный webhook/worker после подключения backend.
+
+## Архитектура MVP
+
+```
+Telegram Mini App / Web UI (docs)
+  ├── Quote Engine (historical reserve demo)
+  ├── Synthetic deposit → confirmation → quote → payout simulation
+  └── Local demo history
+         ↓ optional backend
+Node HTTP API (src/server.mjs)
+  ├── /api/health, /api/quote (read-only RPC)
+  ├── /api/session (Telegram initData HMAC)
+  └── no real transfer endpoint
+```
+
+## Развитие
+
+1. **Watcher:** отдельный депозитный адрес, BSC USDT Transfer logs, подтверждения, защита от reorg и дубликатов.
+2. **Ledger + rate engine:** фиксирование цены по блоку, резервов, проскальзывания и комиссии.
+3. **External signer + payout:** лимиты, HSM/внешнее подписание, nonce, reconciliation по исходному хешу; сначала тестовая сеть и mocks.
+
+Перед реальным запуском: отдельные адреса и резервы, юридическая проверка криптообменной деятельности, лимиты, anti-fraud, аудит безопасности. Никакие реальные переводы не должны отправляться на адреса из демонстрации.
+
+Исследование конкурента и доказательства находятся отдельно в приватном репозитории `tradeain8n/mttswap-wallet-audit`. Закрытый код и секреты конкурента не копируются.

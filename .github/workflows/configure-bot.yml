@@ -1,0 +1,21 @@
+name: Configure Telegram Mini App menu
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  configure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify bot integration
+        run: node --check scripts/configure_bot.mjs
+      - name: Set Telegram bot menu
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          MINIAPP_URL: https://tradeain8n.github.io/mtt-exchange-miniapp/
+        run: node scripts/configure_bot.mjs

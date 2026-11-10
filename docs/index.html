@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1020">
+  <meta name="description" content="MTT Exchange — Telegram Mini App. Беззаявочный обмен USDT в BSC на MTT Network.">
+  <title>MTT Exchange · Mini App</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./assets/main.css">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script defer type="module" src="./assets/main.js"></script>
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true"><span>MTT</span></div>
+        <div class="brand-name">MTT <span>EXCHANGE</span><small>Telegram Mini App</small></div>
+      </div>
+      <span class="status-pill"><span class="status-dot"></span> DEMO MVP</span>
+    </header>
+    <div class="network-alert" role="status"><span class="alert-icon">i</span><span>Тестовый интерфейс. Отправка реальных средств отключена. Не переводите токены по адресу из демо.</span></div>
+
+    <div class="hero">
+      <div class="hero-glow" aria-hidden="true"></div>
+      <span class="eyebrow">БЕЗ ЗАЯВОК И ЛИШНИХ ШАГОВ</span>
+      <h1>Обмен MTT<br><em>в один перевод.</em></h1>
+      <p>USDT в сети BSC → MTT Network. После оплаты система обнаруживает транзакцию и рассчитывает выплату на ваш EVM-адрес.</p>
+      <div class="hero-chips"><span>◈ BSC</span><span>↔</span><span>◈ MTT Chain</span></div>
+    </div>
+
+    <nav class="tabs" aria-label="Разделы приложения">
+      <button class="tab selected" data-tab="swap" aria-selected="true">Обмен</button>
+      <button class="tab" data-tab="history" aria-selected="false">История</button>
+      <button class="tab" data-tab="about" aria-selected="false">Как работает</button>
+    </nav>
+
+    <section id="pane-swap" class="pane" aria-label="Демо обмена">
+      <div class="swap-card">
+        <div class="card-head"><span>РАССЧИТАТЬ ОБМЕН</span><span class="rate-tag">◉ Демо-котировка</span></div>
+        <label class="token-input" for="amount">
+          <span class="field-label">Отдаёте</span>
+          <div class="token-line">
+            <input id="amount" type="text" value="1.10" inputmode="decimal" autocomplete="off" aria-label="Сумма USDT в BSC">
+            <div class="token-badge"><span class="coin usdt">₮</span><span>USDT<small>BSC · BEP-20</small></span></div>
+          </div>
+        </label>
+        <div class="switch-line" aria-hidden="true"><div class="switch-circle">↓</div></div>
+        <div class="token-input token-output" aria-live="polite">
+          <span class="field-label">Получаете (приблизительно)</span>
+          <div class="token-line">
+            <output id="result">—</output>
+            <div class="token-badge"><span class="coin mtt">M</span><span>MTT<small>MTT Network</small></span></div>
+          </div>
+        </div>
+        <div class="details">
+          <div><span>Комиссия сервиса</span><strong id="service-fee">1,0%</strong></div>
+          <div><span>Комиссия пула</span><strong>2,5%</strong></div>
+          <div><span>Ценовое влияние</span><strong id="impact">—</strong></div>
+          <div><span>Курс, 1 USDT</span><strong id="per-usdt">—</strong></div>
+        </div>
+        <div class="quote-notice">Расчёт по историческому снимку пула от 10.11.2026. Это не актуальная торговая котировка или гарантия получения.</div>
+        <button id="simulate" class="primary" type="button">Проверить демо-сценарий <span aria-hidden="true">↗</span></button>
+        <p class="under-button">Без подключения кошелька · Без списания средств</p>
+      </div>
+
+      <section id="simulation" class="simulation hidden" aria-live="polite">
+        <div class="section-label">ИМИТАЦИЯ ОБРАБОТКИ</div>
+        <div class="sim-status"><span id="sim-status-text">Подготовка...</span><span id="sim-pill">DEMO</span></div>
+        <ol class="steps">
+          <li data-step="0"><span class="step-n">1</span><div><strong>Поступление USDT</strong><small>Событие Transfer в BSC</small></div></li>
+          <li data-step="1"><span class="step-n">2</span><div><strong>Проверка подтверждений</strong><small>Контракт, адрес, сумма, finality</small></div></li>
+          <li data-step="2"><span class="step-n">3</span><div><strong>Фиксация курса</strong><small>Резервы пула и комиссии</small></div></li>
+          <li data-step="3"><span class="step-n">4</span><div><strong>Выплата MTT</strong><small>Тот же EVM-адрес в MTT Network</small></div></li>
+        </ol>
+        <p class="simulation-foot">Это синтетический пример. Хеши реальных транзакций не создаются.</p>
+      </section>
+      <div class="info-strip"><span class="info-symbol">✧</span><div><strong>Одна адресная пара</strong><p>В BSC и MTT Network используется одинаковый EVM-адрес. Переводы с централизованных бирж могут требовать отдельного адреса получения.</p></div></div>
+    </section>
+
+    <section id="pane-history" class="pane hidden" aria-label="История демо-операций">
+      <div class="section-label">ИСТОРИЯ СИМУЛЯЦИЙ</div>
+      <div id="history-content" class="history-content"></div>
+      <p class="muted-note">История хранится только в этом браузере. Настоящие операции появятся после подключения backend и blockchain watcher.</p>
+    </section>
+    <section id="pane-about" class="pane hidden" aria-label="Как устроен обмен">
+      <div class="section-label">КАК БУДЕТ РАБОТАТЬ ОБМЕННИК</div>
+      <div class="about-card">
+        <div class="about-step"><span>01</span><div><strong>Один адрес для депозита</strong><p>Пользователь переводит USDT BEP-20 на адрес обменника. Заявка на сайте не создаётся.</p></div></div>
+        <div class="about-step"><span>02</span><div><strong>Сканирование BSC</strong><p>Watcher следит за событиями официального контракта USDT и ожидает подтверждений сети.</p></div></div>
+        <div class="about-step"><span>03</span><div><strong>Курс и резерв</strong><p>Rate Engine рассчитывает количество MTT с учётом резерва, комиссии и влияния объёма сделки.</p></div></div>
+        <div class="about-step"><span>04</span><div><strong>Автоматическая выплата</strong><p>Отдельный подписант отправляет MTT на исходный EVM-адрес и фиксирует оба хеша.</p></div></div>
+      </div>
+      <p class="muted-note">До запуска реального обмена необходимы контрактный аудит, контроль резервов, обработка сбоев и соблюдение требований применимого законодательства.</p>
+    </section>
+
+    <footer class="footer">
+      <span>MTT EXCHANGE <span class="version">MVP · 0.1</span></span>
+      <span id="environment">SANDBOX MODE</span>
+    </footer>
+  </main>
+  <div id="toast" role="status" aria-live="polite" class="toast hidden"></div>
+</body>
+</html>

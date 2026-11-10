@@ -1,0 +1,17 @@
+{
+  "name": "MTT Exchange — Telegram Mini App",
+  "short_name": "MTT Exchange",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#080e1c",
+  "theme_color": "#080e1c",
+  "description": "MTT Exchange MVP демонстрация автоматического обмена",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
