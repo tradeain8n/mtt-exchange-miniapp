@@ -2,9 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {ROUTES,classifyPolygonUsdc,routeCanAccept} from '../docs/assets/routes.js';
+import {CENTRAL} from '../docs/assets/chain.js';
 
 const valid={ok:true,accepting:true,chainId:56,
- usdtContract:ROUTES['bsc-usdt'].contract,central:'0x'+'1'.repeat(40)};
+ usdtContract:ROUTES['bsc-usdt'].contract,central:CENTRAL};
 
 test('native Polygon USDC differs from bridged USDC.e and has six decimals',()=>{
  const polygon=ROUTES['polygon-usdc'];
@@ -25,7 +26,8 @@ test('BSC USDT payment requires exact chain, token, healthy backend and central 
  for(const bad of [
   null,{...valid,ok:false},{...valid,accepting:false},
   {...valid,chainId:137},{...valid,usdtContract:ROUTES['polygon-usdc'].contract},
-  {...valid,central:null},{...valid,central:'not-an-address'}
+  {...valid,central:null},{...valid,central:'not-an-address'},
+  {...valid,central:'0x'+'1'.repeat(40)}
  ])assert.equal(routeCanAccept('bsc-usdt',bad),false);
 });
 
