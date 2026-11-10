@@ -7,3 +7,6 @@ coverage/
 *.key
 *.pem
 *.seed
+
+__pycache__/
+*.pyc
