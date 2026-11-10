@@ -1,3 +1,4 @@
+import {CENTRAL} from './chain.js';
 // Funding routes are deliberately separate from settlement capability.
 // No Polygon deposit address or payment permissions are exposed until a verified processor exists.
 export const ROUTES=Object.freeze({
@@ -27,5 +28,5 @@ export function routeCanAccept(key,health){
  if(health.chainId!==route.chainId||
   typeof health.usdtContract!=='string'||
   health.usdtContract.toLowerCase()!==route.contract.toLowerCase())return false;
- return typeof health.central==='string'&&/^0x[0-9a-f]{40}$/i.test(health.central);
+ return typeof health.central==='string'&&health.central.toLowerCase()===CENTRAL.toLowerCase();
 }
