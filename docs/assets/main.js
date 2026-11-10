@@ -1,11 +1,17 @@
 import {parseUsdt,formatWei,fetchLiveReserves,calculateQuote} from './quote.js';
 import {getDeposit,hashOk,sendViaWallet,CENTRAL} from './chain.js';
+import {routeCanAccept} from './routes.js';
 
 const tg=window.Telegram?.WebApp;
 if(tg){tg.ready();tg.expand();try{tg.setHeaderColor('#0b111c');tg.setBackgroundColor('#0b111c')}catch{}}
 const el=id=>document.getElementById(id);
 const $=selector=>document.querySelector(selector);
 const amount=el('amount');
+const fundingRoute=el('funding-route');
+let sourceRoute=new URLSearchParams(window.location.search).get('asset')==='polygon-usdc'
+ ?'polygon-usdc':'bsc-usdt';
+fundingRoute.value=sourceRoute;
+let lastServiceStatus=null;
 let apiBase=null,accepting=false,quoteFresh=false,quoteTimer=null;
 let currentHash='',checking=false,lastQuote=null,toastTimer=0;
 const notify=msg=>{
@@ -59,14 +65,21 @@ function addLink(label,url){
  el('tx-links').append(item);
 }
 function setAccepting(state){
- accepting=Boolean(state?.accepting)&&apiBase!==null;
+ lastServiceStatus=state;
+ const polygon=sourceRoute==='polygon-usdc';
+ accepting=apiBase!==null&&routeCanAccept(sourceRoute,state);
+ el('service-closed-title').textContent=polygon
+  ?'Polygon USDC пока не принимается':'Новые обмены временно недоступны';
+ el('service-closed-description').textContent=polygon
+  ?'Этот маршрут не подключён к финансовому процессору. Не переводите Polygon USDC или USDC.e на адрес обменника. Доступность BSC не означает доступность Polygon.'
+  :'Котировку можно проверить, но отправлять средства пока нельзя. Открытие приёма подтверждается финансовым процессором.';
  const badge=el('service-badge');
  badge.classList.toggle('badge-open',accepting);
  badge.classList.toggle('badge-wait',!accepting);
- badge.querySelector('span').textContent=accepting?'Обмен доступен':'Приём приостановлен';
+ badge.querySelector('span').textContent=accepting?'Обмен доступен':polygon?'Polygon недоступен':'Приём приостановлен';
  el('service-closed').classList.toggle('hidden',accepting);
  el('payment-panel').classList.toggle('hidden',!accepting);
- el('footer-status').textContent=accepting?'Приём открыт':'Новые депозиты не принимаются';
+ el('footer-status').textContent=accepting?'Приём открыт':polygon?'Polygon USDC: недоступен':'Новые депозиты не принимаются';
  if(accepting&&state?.central){
   el('deposit-address').textContent=state.central;
  }
@@ -101,6 +114,29 @@ async function refreshService(){
   setAccepting(data.ok?data:null);
  }catch{setAccepting(null)}
 }
+function renderSourceRoute(){
+ const polygon=sourceRoute==='polygon-usdc';
+ el('source-ticker').textContent=polygon?'USDC':'USDT';
+ el('source-asset').textContent=polygon?'USDC':'USDT';
+ el('source-network').textContent=polygon?'Polygon · 137':'BSC · BEP-20';
+ el('route-description').textContent=polygon
+  ?'USDC в Polygon — отдельный маршрут, пока недоступный для обмена на MTT. Существуют native USDC и USDC.e с разными контрактами. Не отправляйте средства до активации.'
+  :'Отправляете USDT BEP-20 из личного EVM-кошелька в сети BNB Smart Chain. После подтверждения сервис покупает нативные MTT и выплачивает их на тот же адрес в MTT Network.';
+ el('polygon-tracking-warning').classList.toggle('hidden',!polygon);
+ el('check-tx').disabled=polygon;
+ el('tx-hash').disabled=polygon;
+ if(polygon){
+  el('tx-progress').textContent='Polygon USDC пока не поддерживается: отслеживание переводов этой сети не включено.';
+ }
+ quoteFresh=false;lastQuote=null;
+ setAccepting(lastServiceStatus);
+}
+fundingRoute.addEventListener('change',()=>{
+ sourceRoute=fundingRoute.value==='polygon-usdc'?'polygon-usdc':'bsc-usdt';
+ renderSourceRoute();
+ void quote();
+});
+
 function sanitizeAmount(){
  const raw=amount.value.trim();
  const wei=parseUsdt(raw);
@@ -108,6 +144,13 @@ function sanitizeAmount(){
  return wei;
 }
 async function quote(){
+ if(sourceRoute==='polygon-usdc'){
+  quoteFresh=false;lastQuote=null;
+  el('result').textContent='—';el('rate').textContent='—';
+  el('quote-state').textContent='Маршрут не поддерживается';
+  el('quote-warning').textContent='Polygon USDC пока не принимается. Не используйте котировку BSC USDT для Polygon. Native USDC и USDC.e — разные токены. Финальная цена и комиссии для Polygon ещё не рассчитаны.';
+  updatePaymentButton();return;
+ }
  const requested=amount.value;
  try{
   const wei=sanitizeAmount();
@@ -125,7 +168,7 @@ async function quote(){
    output=formatWei(q.amountOut,2).replace(/\s/g,'').replace(',','.');
    source='onchain';
   }
-  if(amount.value!==requested)return;
+  if(amount.value!==requested||sourceRoute!=='bsc-usdt')return;
   lastQuote=output;
   quoteFresh=true;
   el('result').textContent=Number(output).toLocaleString('ru-RU',{maximumFractionDigits:2});
@@ -169,6 +212,9 @@ async function refreshLiveBeforePayment(){
 el('send').addEventListener('click',()=>void payment());
 function label(text){el('tx-progress').textContent=text}
 async function check(){
+ if(sourceRoute==='polygon-usdc'){
+  label('Polygon USDC пока не отслеживается. Не отправляйте средства на адрес обменника.');return;
+ }
  if(checking)return;
  const hash=cleanHash(el('tx-hash').value);
  if(!hashOk(hash)){label('Введите корректный BSC Transaction Hash');return}
@@ -210,11 +256,12 @@ try{
  const saved=localStorage.getItem('baby-mtt-last-tx');
  if(hashOk(saved)){el('tx-hash').value=saved;currentHash=saved}
 }catch{}
+renderSourceRoute();
 await initializeBackend();
 await quote();
 setInterval(()=>void quote(),30000);
 setInterval(()=>void refreshService(),30000);
-setInterval(()=>{if(!document.hidden&&currentHash&&$('.tab.selected')?.dataset.tab==='status')void check()},30000);
+setInterval(()=>{if(sourceRoute==='bsc-usdt'&&!document.hidden&&currentHash&&$('.tab.selected')?.dataset.tab==='status')void check()},30000);
 el('wallet-hint').textContent=window.ethereum?.request
  ?'Ваш EVM-кошелёк подключается через кнопку. Подтвердите перевод самостоятельно.'
  :'Встроенный EVM-кошелёк не обнаружен. При открытом приёме скопируйте адрес и отправьте USDT из своего кошелька.';

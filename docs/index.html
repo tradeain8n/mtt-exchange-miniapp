@@ -21,8 +21,8 @@
 
     <section class="intro">
       <p class="eyebrow">ОБМЕН БЕЗ ЗАЯВОК</p>
-      <h1>USDT <span>→</span> MTT</h1>
-      <p>Отправляете USDT BEP-20 из личного EVM-кошелька в сети BNB Smart Chain. После подтверждения сервис покупает нативные MTT и выплачивает их на тот же адрес в MTT Network.</p>
+      <h1><span id="source-ticker">USDT</span> <span>→</span> MTT</h1>
+      <p id="route-description">Отправляете USDT BEP-20 из личного EVM-кошелька в сети BNB Smart Chain. После подтверждения сервис покупает нативные MTT и выплачивает их на тот же адрес в MTT Network.</p>
       <p class="muted"><strong>USDT на Binance?</strong> Сначала выведите BEP-20 на свой кошелёк (например, Trust Wallet или MetaMask); потребуется BNB для комиссии следующего перевода. <a href="https://t.me/babymttbot?start=binance" target="_blank" rel="noopener noreferrer">Инструкция для Binance</a>. Не отправляйте прямо с биржи на адрес обменника.</p>
     </section>
 
@@ -34,8 +34,13 @@
 
     <section id="pane-exchange" class="pane">
       <div class="swap-card">
-        <div class="section-top"><span>ВЫ ОТПРАВЛЯЕТЕ</span><span class="net">BSC · BEP-20</span></div>
-        <div class="amount-line"><input id="amount" value="1.00" inputmode="decimal" autocomplete="off" aria-label="Сумма USDT в сети BSC"><div class="asset"><span class="coin coin-usdt">₮</span>USDT</div></div>
+        <label for="funding-route" class="field-name">Актив и сеть отправления</label>
+        <select id="funding-route" class="route-select" aria-label="Выберите сеть и актив для обмена">
+          <option value="bsc-usdt">USDT · BNB Smart Chain (BEP-20)</option>
+          <option value="polygon-usdc">USDC · Polygon (PoS) — пока недоступен</option>
+        </select>
+        <div class="section-top"><span>ВЫ ОТПРАВЛЯЕТЕ</span><span class="net" id="source-network">BSC · BEP-20</span></div>
+        <div class="amount-line"><input id="amount" value="1.00" inputmode="decimal" autocomplete="off" aria-label="Сумма USDT в сети BSC"><div class="asset"><span class="coin coin-usdt">₮</span><span id="source-asset">USDT</span></div></div>
         <div class="middle-arrow"><span>↓</span></div>
         <div class="section-top"><span>ОЖИДАЕМАЯ ВЫПЛАТА</span><span class="net">MTT Network</span></div>
         <div class="amount-line payout-line"><output id="result">—</output><div class="asset"><span class="coin coin-mtt">M</span>MTT</div></div>
@@ -46,8 +51,8 @@
         <p id="quote-warning" class="small-warning">Расчёт предварительный: клиент получает 90% фактически купленных MTT, 10% остаётся сервису. Курс плавающий, расходы на сеть и вывод с биржи могут быть дополнительными.</p>
 
         <div id="service-closed" class="notice" role="status">
-          <strong>Новые обмены временно недоступны</strong>
-          <p>Котировку можно проверить, но отправлять средства пока нельзя. Открытие приёма подтверждается финансовым процессором.</p>
+          <strong id="service-closed-title">Новые обмены временно недоступны</strong>
+          <p id="service-closed-description">Котировку можно проверить, но отправлять средства пока нельзя. Открытие приёма подтверждается финансовым процессором.</p>
         </div>
 
         <div id="payment-panel" class="hidden">
@@ -66,6 +71,7 @@
       <div class="track-card">
         <p class="eyebrow">БЛОКЧЕЙН · ПРОВЕРКА</p>
         <h2>Отследить обмен</h2>
+        <p id="polygon-tracking-warning" class="small-warning hidden">Отслеживание Polygon USDC пока не подключено. Не отправляйте USDC на адрес обменника.</p>
         <p class="muted">Вставьте хеш отправки USDT в сети BSC. Отобразятся реальные подтверждения и статус выплаты, если операция зарегистрирована процессором.</p>
         <label class="field-name" for="tx-hash">BSC Transaction Hash</label>
         <input class="hash-input" id="tx-hash" placeholder="0x..." autocomplete="off" spellcheck="false">
