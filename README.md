@@ -36,3 +36,10 @@ Private backend: https://github.com/tradeain8n/mtt-exchange-engine
 Токены Telegram и приватные ключи никогда не добавляются в публичные JavaScript/HTML или репозиторий.
 
 Токен бота, который когда-либо размещался в открытой переписке, необходимо перевыпустить через BotFather до массового запуска.
+
+To connect the frontend to a verified **public HTTPS** backend later:
+```bash
+python3 scripts/connect_public_api.py https://api.YOUR-DOMAIN
+npm test && npm run check
+```
+The onboarding script checks chain identity and CORS before changing docs/config.json. Do not configure a random public tunnel URL or claim production availability when the backend returns accepting=false.
