@@ -131,7 +131,7 @@ async function quote(){
   el('result').textContent=Number(output).toLocaleString('ru-RU',{maximumFractionDigits:2});
   el('rate').textContent=(Number(output)/Number(wei/10n**12n)*1000000).toLocaleString('ru-RU',{maximumFractionDigits:1})+' MTT';
   el('quote-state').textContent=source==='backend'?'Текущая, плавающая':'Из текущих резервов';
-  el('quote-warning').textContent='Предварительная котировка по ликвидности пула. Итог зависит от цены при исполнении после моста.';
+  el('quote-warning').textContent='Предварительная котировка: клиенту 90% фактически купленных MTT, сервису 10%. Итог зависит от цены пула при исполнении. Вывод с Binance и сетевые комиссии оплачиваются отдельно.';
  }catch{
   quoteFresh=false;lastQuote=null;el('result').textContent='—';
   el('rate').textContent='—';el('quote-state').textContent='Недоступна';
