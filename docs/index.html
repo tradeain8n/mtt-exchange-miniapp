@@ -37,7 +37,7 @@
         <label for="funding-route" class="field-name">Актив и сеть отправления</label>
         <select id="funding-route" class="route-select" aria-label="Выберите сеть и актив для обмена">
           <option value="bsc-usdt">USDT · BNB Smart Chain (BEP-20)</option>
-          <option value="polygon-usdc">USDC · Polygon (PoS) — пока недоступен</option>
+          <option value="polygon-usdc">USDC · Polygon (PoS) → MTT</option>
         </select>
         <div class="section-top"><span>ВЫ ОТПРАВЛЯЕТЕ</span><span class="net" id="source-network">BSC · BEP-20</span></div>
         <div class="amount-line"><input id="amount" value="1.00" inputmode="decimal" autocomplete="off" aria-label="Сумма USDT в сети BSC"><div class="asset"><span class="coin coin-usdt">₮</span><span id="source-asset">USDT</span></div></div>
@@ -64,6 +64,22 @@
           <button id="send" type="button" class="primary" disabled>Отправить USDT через кошелёк</button>
           <p id="wallet-hint" class="hint">Если в Telegram нет подключённого кошелька, скопируйте адрес и отправьте USDT через приложение своего кошелька.</p>
         </div>
+
+        <div id="polygon-panel" class="hidden" aria-live="polite">
+          <div class="divider"></div>
+          <p class="hint">USDC Circle в Polygon (адрес контракта 0x3c499c…c3359). Не используйте USDC.e или адрес USDT BSC. Для комиссии сети потребуется POL.</p>
+          <label class="consent"><input type="checkbox" id="polygon-agree"><span>Я владею адресом отправления и получения MTT, понимаю, что SideShift и Baby MTT удерживают отдельные комиссии, а точная сумма MTT зависит от исполнения.</span></label>
+          <button type="button" id="polygon-create" class="primary" disabled>Создать заявку 3–20 USDC</button>
+          <p id="polygon-checkout-hint" class="hint">Для подписания заявки нужен EVM-кошелёк с поддержкой personal_sign (например, браузер MetaMask).</p>
+          <div id="polygon-order" class="hidden">
+            <p class="field-name">Переводить только указанную сумму USDC через Polygon</p>
+            <div class="address"><code id="polygon-order-address"></code><button type="button" id="polygon-copy-address">Копировать</button></div>
+            <p class="hint" id="polygon-order-details"></p>
+            <p class="small-warning" id="polygon-order-expiry"></p>
+            <button type="button" id="polygon-pay" class="primary" disabled>Отправить USDC через кошелёк Polygon</button>
+            <p class="hint">Адрес выдаётся SideShift индивидуально на ограниченное время. Не повторяйте перевод. При истечении срока не используйте старый адрес.</p>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -71,13 +87,18 @@
       <div class="track-card">
         <p class="eyebrow">БЛОКЧЕЙН · ПРОВЕРКА</p>
         <h2>Отследить обмен</h2>
-        <p id="polygon-tracking-warning" class="small-warning hidden">Отслеживание Polygon USDC пока не подключено. Не отправляйте USDC на адрес обменника.</p>
-        <p class="muted">Вставьте хеш отправки USDT в сети BSC. Отобразятся реальные подтверждения и статус выплаты, если операция зарегистрирована процессором.</p>
-        <label class="field-name" for="tx-hash">BSC Transaction Hash</label>
+        <div id="polygon-tracking-warning" class="hidden">
+          <p class="small-warning">Отслеживание Polygon выполняется по индивидуальной заявке SideShift. Если адрес истёк, не отправляйте туда средства.</p>
+          <div id="polygon-status" class="status-msg">Заявка пока не создана.</div>
+          <button id="polygon-check-order" type="button" class="secondary">Обновить статус заявки</button>
+          <div id="polygon-order-links" class="tx-links"></div>
+        </div>
+        <p class="muted" id="bsc-tracking-intro">Вставьте хеш отправки USDT в сети BSC. Отобразятся реальные подтверждения и статус выплаты, если операция зарегистрирована процессором.</p>
+        <label id="bsc-hash-label" class="field-name" for="tx-hash">BSC Transaction Hash</label>
         <input class="hash-input" id="tx-hash" placeholder="0x..." autocomplete="off" spellcheck="false">
         <button type="button" id="check-tx" class="secondary">Проверить перевод</button>
         <div id="tx-progress" class="status-msg" role="status">Укажите хеш транзакции</div>
-        <div class="steps">
+        <div class="steps" id="bsc-steps">
           <div class="step" data-stage="0"><span>1</span><div><strong>USDT в сети BSC</strong><small>Проверка отправителя, суммы и подтверждений</small></div></div>
           <div class="step" data-stage="1"><span>2</span><div><strong>Bridge / резерв USDT</strong><small>Поступление актива в MTT Network</small></div></div>
           <div class="step" data-stage="2"><span>3</span><div><strong>Покупка через Router</strong><small>Обмен USDT на нативный MTT</small></div></div>
@@ -90,6 +111,7 @@
     <section id="pane-info" class="pane hidden">
       <div class="info-card">
         <h2>Как работает обмен</h2>
+        <p class="muted">Для Polygon USDC: кошелёк подписывает заявку → SideShift выдаёт индивидуальный адрес → USDT поступает в BSC → Baby MTT покупает MTT → выплата на ваш подписанный адрес. Точный адрес отправки показывается только при открытом приёме.</p>
         <div class="info-item"><span>01</span><p><strong>Один перевод USDT</strong><br>Блокчейн BSC подтверждает отправку USDT с вашего кошелька на адрес обменника.</p></div>
         <div class="info-item"><span>02</span><p><strong>Резерв или мост</strong><br>Система использует имеющийся USDT в MTT Network или переводит нужную сумму через Bridge.</p></div>
         <div class="info-item"><span>03</span><p><strong>Прямой пул</strong><br>Router покупает нативные MTT, после чего вычисляется сумма клиенту по условиям курса.</p></div>
