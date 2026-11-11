@@ -73,7 +73,7 @@ export function setupPolygonCheckout({el,notify,getApiBase,isRouteActive,isQuote
   el('polygon-order-expiry').textContent=hasDeposit
    ?'Адрес действует до '+new Date(order.expiresAt).toLocaleString('ru-RU')+'. Не переводите после окончания срока.':'';
   pay.disabled=!canPay;
-  btn.disabled=!isPolygon||!isRouteActive()||busy||!window.ethereum?.request||
+  btn.disabled=!isPolygon||!isRouteActive()||!isQuoteFresh()||busy||!window.ethereum?.request||
    !el('polygon-agree').checked||hasDeposit;
   const target=el('polygon-status');
   target.textContent=order
