@@ -40,5 +40,6 @@ test('Mini App offers Polygon selection but explicitly blocks its payouts, quote
  assert.match(js,/sourceRoute==='polygon-usdc'/);
  assert.match(js,/Polygon USDC пока не принимается/);
  assert.match(js,/Polygon USDC пока не отслеживается/);
- assert.match(js,/Не используйте котировку BSC USDT для Polygon/);
+ assert.match(js,/\/api\/polygon\/quote\?amount=/);
+ assert.match(js,/polygonRouteCanAccept\(state\)/);
 });
