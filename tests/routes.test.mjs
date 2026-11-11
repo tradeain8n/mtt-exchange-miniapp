@@ -31,15 +31,19 @@ test('BSC USDT payment requires exact chain, token, healthy backend and central 
  ])assert.equal(routeCanAccept('bsc-usdt',bad),false);
 });
 
-test('Mini App offers Polygon selection but explicitly blocks its payouts, quotes and tracing',()=>{
+test('Mini App routes Polygon only to its own signed checkout and never BSC payment',()=>{
  const html=readFileSync(new URL('../docs/index.html',import.meta.url),'utf8');
  const js=readFileSync(new URL('../docs/assets/main.js',import.meta.url),'utf8');
+ const checkout=readFileSync(new URL('../docs/assets/polygon_checkout.js',import.meta.url),'utf8');
  assert.match(html,/option value="polygon-usdc"/);
  assert.match(html,/id="service-closed-title"/);
- assert.match(js,/routeCanAccept\(sourceRoute,state\)/);
- assert.match(js,/sourceRoute==='polygon-usdc'/);
- assert.match(js,/Polygon USDC пока не принимается/);
- assert.match(js,/Polygon USDC пока не отслеживается/);
- assert.match(js,/\/api\/polygon\/quote\?amount=/);
+ assert.match(html,/id="polygon-create" class="primary" disabled/);
+ assert.match(html,/id="polygon-pay" class="primary" disabled/);
  assert.match(js,/polygonRouteCanAccept\(state\)/);
+ assert.match(js,/sourceRoute==='polygon-usdc'/);
+ assert.match(js,/\/api\/polygon\/quote/);
+ assert.match(js,/sourceRoute!=='bsc-usdt'/);
+ assert.match(checkout,/polygonOrderValid\(order\)/);
+ assert.match(checkout,/isRouteActive\(\)/);
+ assert.match(checkout,/isQuoteFresh\(\)/);
 });
