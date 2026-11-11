@@ -45,7 +45,7 @@ test('client never sees expired, unknown token or non-waiting deposit address',(
  assert.equal(polygonOrderValid({...active,depositToken:ROUTES['polygon-usdc'].bridgedContract}),false);
  assert.equal(polygonOrderValid({...active,depositAmount:'21'}),false);
  assert.equal(polygonOrderValid({...active,expiresAt:new Date(Date.now()-60000).toISOString()}),false);
- assert.equal(polygonOrderValid({...active,depositAddress:CENTRAL}),true);
+ assert.equal(polygonOrderValid({...active,depositAddress:CENTRAL}),false);
 });
 test('UI routes to signed order APIs and cannot use BSC send for Polygon',()=>{
  const html=readFileSync(new URL('../docs/index.html',import.meta.url),'utf8');
