@@ -33,7 +33,7 @@ const STATUSES={
  refunded:'Возврат подтверждён',expired:'Срок заявки истёк — не используйте старый адрес'
 };
 
-export function setupPolygonCheckout({el,notify,getApiBase,isRouteActive,getSourceRoute,getAmount}){
+export function setupPolygonCheckout({el,notify,getApiBase,isRouteActive,isQuoteFresh,getSourceRoute,getAmount}){
  const btn=el('polygon-create'),pay=el('polygon-pay');
  const orderSection=el('polygon-order');
  let order=null,access=null,busy=false;
