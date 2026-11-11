@@ -15,13 +15,15 @@ export function encodePolygonUsdcTransfer(to,amount){
   wei.toString(16).padStart(64,'0');
 }
 export function polygonOrderValid(order){
- return Boolean(order&&order.state==='waiting'&&
-  /^0x[0-9a-f]{40}$/i.test(order.depositAddress||'')&&
-  order.depositToken?.toLowerCase()===ROUTES['polygon-usdc'].contract.toLowerCase()&&
-  order.depositNetwork==='polygon'&&
-  parsePolygonUsdcAmount(order.depositAmount)>=3000000n&&
-  Number.isFinite(Date.parse(order.expiresAt))&&
-  Date.parse(order.expiresAt)>Date.now()+10000);
+ try{
+  return Boolean(order&&order.state==='waiting'&&
+   /^0x[0-9a-f]{40}$/i.test(order.depositAddress||'')&&
+   order.depositToken?.toLowerCase()===ROUTES['polygon-usdc'].contract.toLowerCase()&&
+   order.depositNetwork==='polygon'&&
+   parsePolygonUsdcAmount(order.depositAmount)>=3000000n&&
+   Number.isFinite(Date.parse(order.expiresAt))&&
+   Date.parse(order.expiresAt)>Date.now()+10000);
+ }catch{return false}
 }
 const STATUSES={
  creating:'Создание заявки',quoted:'Котировка получена',waiting:'Ожидание USDC в Polygon',
