@@ -1,4 +1,5 @@
 import {ROUTES} from './routes.js';
+import {CENTRAL} from './chain.js';
 
 export function parsePolygonUsdcAmount(text){
  if(typeof text!=='string'||! /^(?:[3-9]|1[0-9]|20)(?:\.[0-9]{1,6})?$/.test(text))
