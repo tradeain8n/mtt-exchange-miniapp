@@ -30,3 +30,11 @@ export function routeCanAccept(key,health){
   health.usdtContract.toLowerCase()!==route.contract.toLowerCase())return false;
  return typeof health.central==='string'&&health.central.toLowerCase()===CENTRAL.toLowerCase();
 }
+
+export function polygonRouteCanAccept(health){
+ const route=ROUTES['polygon-usdc'];
+ return Boolean(health&&health.accepting===true&&
+  health.network==='polygon'&&health.chainId===route.chainId&&
+  health.token?.toLowerCase()===route.contract.toLowerCase()&&
+  health.payoutNetwork==='MTT'&&health.minUsdc==='3'&&health.maxUsdc==='20');
+}
