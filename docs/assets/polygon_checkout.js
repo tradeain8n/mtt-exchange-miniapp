@@ -154,6 +154,13 @@ export function setupPolygonCheckout({el,notify,getApiBase,isRouteActive,isQuote
    if(parseInt(chain,16)!==137){
     await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:'0x89'}]});
    }
+   const afterChain=await window.ethereum.request({method:'eth_chainId'});
+   const afterAccounts=await window.ethereum.request({method:'eth_accounts'});
+   if(parseInt(afterChain,16)!==137||
+    !afterAccounts?.some(a=>a.toLowerCase()===address.toLowerCase()))
+    throw Error('Сеть Polygon или адрес кошелька изменились');
+   if(!isRouteActive()||!polygonOrderValid(order))
+    throw Error('Приём был закрыт или срок заявки истёк. Не отправляйте USDC');
    if(!confirm('Отправить РОВНО '+latest.order.depositAmount+
     ' USDC Polygon на индивидуальный адрес SideShift? После истечения срока переводить нельзя.'))return;
    const data=encodePolygonUsdcTransfer(latest.order.depositAddress,latest.order.depositAmount);
