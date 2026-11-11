@@ -285,7 +285,7 @@ try{
  if(hashOk(saved)){el('tx-hash').value=saved;currentHash=saved}
 }catch{}
 polygonCheckout=setupPolygonCheckout({
- el,notify,getApiBase:()=>apiBase,isRouteActive:()=>accepting,
+ el,notify,getApiBase:()=>apiBase,isRouteActive:()=>accepting,isQuoteFresh:()=>quoteFresh,
  getSourceRoute:()=>sourceRoute,getAmount:()=>amount.value
 });
 renderSourceRoute();
