@@ -19,6 +19,7 @@ export function polygonOrderValid(order){
  try{
   return Boolean(order&&order.state==='waiting'&&
    /^0x[0-9a-f]{40}$/i.test(order.depositAddress||'')&&
+   order.depositAddress.toLowerCase()!==CENTRAL.toLowerCase()&&
    order.depositToken?.toLowerCase()===ROUTES['polygon-usdc'].contract.toLowerCase()&&
    order.depositNetwork==='polygon'&&
    parsePolygonUsdcAmount(order.depositAmount)>=3000000n&&
