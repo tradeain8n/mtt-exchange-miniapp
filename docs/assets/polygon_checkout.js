@@ -108,7 +108,7 @@ export function setupPolygonCheckout({el,notify,getApiBase,isRouteActive,isQuote
   }
  }
  async function create(){
-  if(getSourceRoute()!=='polygon-usdc'||!isRouteActive()||busy)return;
+  if(getSourceRoute()!=='polygon-usdc'||!isRouteActive()||!isQuoteFresh()||busy)return;
   busy=true;refreshPresentation();
   try{
    const raw=getAmount().trim().replace(',','.');
