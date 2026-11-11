@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101824">
+  <title>Baby MTT Exchange V2 · Мой аккаунт</title>
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script type="module" defer src="./assets/v2-auth.js"></script>
+  <style>
+    :root{color-scheme:dark;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#101824;color:#f1f5f9}
+    *{box-sizing:border-box}body{margin:0}.wrap{max-width:560px;margin:auto;padding:24px 18px 56px}
+    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:32px}
+    .logo{font-weight:900;font-size:18px;letter-spacing:.02em}.logo span{display:block;font-size:10px;color:#8ea2bb;letter-spacing:.22em;margin-top:3px}
+    a{color:#7bded3}header a{font-size:13px;text-decoration:none}
+    .eyebrow{color:#69d8be;font-size:12px;letter-spacing:.13em;font-weight:800;margin:0 0 12px}
+    h1{font-size:30px;letter-spacing:-.04em;line-height:1.1;margin:0 0 12px}
+    h2{font-size:18px;margin:0 0 18px}.muted{color:#93a4ba;line-height:1.5;font-size:14px}
+    .card{background:#192535;border:1px solid #334358;border-radius:18px;padding:22px;margin-top:18px}
+    .hidden{display:none}.label{color:#9fb0c4;font-size:12px;margin-top:12px;margin-bottom:7px}
+    .value{word-break:break-all;font-size:15px;line-height:1.5;font-weight:650}
+    .tag{display:inline-block;background:#203b3a;color:#8aead5;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:700}
+    button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:14px 16px;font-weight:750;color:#091722;background:#75e3d1;width:100%;margin-top:14px}
+    button.secondary{background:#263648;color:#e9f6ff;border:1px solid #40536b}
+    button:disabled{opacity:.45;cursor:not-allowed}.links{display:flex;gap:16px;flex-wrap:wrap;padding:18px 0;font-size:13px}
+    .warning{padding:12px;border-radius:10px;background:#322b22;color:#e7c8a1;font-size:12px;line-height:1.6}
+    .status{color:#b4c7dd;font-size:14px;min-height:24px;margin-top:12px;line-height:1.5}
+    .ok{color:#83e6bd}.error{color:#ffaaa2}footer{text-align:center;color:#72849b;font-size:11px;line-height:1.5;padding-top:30px}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <div class="logo">BABY MTT <span>EXCHANGE · V2</span></div>
+      <a href="./index.html">← Обмен</a>
+    </header>
+    <p class="eyebrow">АККАУНТ · КОШЕЛЁК</p>
+    <h1>Вход через Telegram</h1>
+    <p class="muted">Один аккаунт — один постоянный адрес в MTT Network. Не нужно придумывать пароль.</p>
+
+    <section class="card" id="login-card">
+      <h2>Регистрация и вход</h2>
+      <p class="muted">Откройте приложение из Telegram-бота @babymttbot, чтобы подтвердить аккаунт.</p>
+      <button type="button" id="login">Войти через Telegram</button>
+      <div id="login-status" class="status" role="status"></div>
+    </section>
+
+    <section class="card hidden" id="profile-card">
+      <div class="tag">Аккаунт активен</div>
+      <h2 style="margin-top:18px" id="name">Мой профиль</h2>
+      <div class="label">Telegram ID</div><div class="value" id="telegram-id"></div>
+      <div class="label">Постоянный адрес · MTT Network (6880)</div>
+      <div class="value" id="wallet-address"></div>
+      <button class="secondary" type="button" id="copy">Скопировать адрес</button>
+      <p class="warning">На этом этапе адрес создан для регистрации. Не пополняйте его: вывод и восстановление доступа к средствам ещё не запущены.</p>
+    </section>
+
+    <section class="card hidden" id="external-card">
+      <h2>Мой внешний кошелёк</h2>
+      <p class="muted" id="external-status">Можно привязать Yaako или другой EVM-кошелёк, если он поддерживает подпись сообщения через DApp-браузер.</p>
+      <button id="connect" type="button">Подключить и подтвердить адрес</button>
+      <p class="status" id="connect-status" role="status"></p>
+      <p class="muted">Привязка подтверждается подписью сообщения. Перевод токенов и доступ к приватному ключу не требуются. Работа Yaako через EIP-1193 пока не проверена.</p>
+    </section>
+
+    <div class="links">
+      <a href="https://yaako.io/" target="_blank" rel="noopener noreferrer">Yaako Wallet</a>
+      <a href="https://mtt.xyz/?i=ba434b5a" target="_blank" rel="noopener noreferrer">MTT SPORTS · регистрация по ссылке</a>
+      <a href="https://explorer.mtt.network/" target="_blank" rel="noopener noreferrer">Обозреватель MTT</a>
+    </div>
+    <footer>Baby MTT Exchange — независимый сервис. Аккаунт покер-рума, Yaako и ваш аккаунт Exchange не объединяются автоматически.</footer>
+  </main>
+</body>
+</html>
